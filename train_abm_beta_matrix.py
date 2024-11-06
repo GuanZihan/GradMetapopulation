@@ -272,6 +272,135 @@ class CalibNNTwoEncoderThreeOutputs(nn.Module):
         
         return out, out2, out3
 
+
+# define the neural network fore predicting epi-parameters
+class CalibNNThreeEncoderThreeOutputs(nn.Module):
+    def __init__(self, params, metas_train_dim, X_train_dim, device, training_weeks, hidden_dim=32, out_dim=1, n_layers=2, scale_output='abm-covid', bidirectional=True):
+        super().__init__()
+
+        self.device = device
+
+        self.training_weeks = training_weeks
+
+        self.params = params
+
+        ''' tune '''
+        hidden_dim=64
+        out_layer_dim = 32
+        
+        self.emb_model = EmbedAttenSeq(
+            dim_seq_in=X_train_dim,
+            dim_metadata=metas_train_dim,
+            rnn_out=hidden_dim,
+            dim_out=hidden_dim,
+            n_layers=n_layers,
+            bidirectional=bidirectional,
+        )
+
+        self.emb_model_2 = EmbedAttenSeq(
+            dim_seq_in=CONFIGS[self.params["disease"]]["num_pub_features"],
+            dim_metadata=80,
+            rnn_out=hidden_dim,
+            dim_out=hidden_dim,
+            n_layers=n_layers,
+            bidirectional=bidirectional,
+        )
+
+        self.emb_model_3 = EmbedAttenSeq(
+            dim_seq_in=6,
+            dim_metadata=metas_train_dim,
+            rnn_out=hidden_dim,
+            dim_out=hidden_dim,
+            n_layers=n_layers,
+            bidirectional=bidirectional,
+        )
+
+        self.decoder = DecodeSeq(
+            dim_seq_in=1,
+            rnn_out=hidden_dim, # divides by 2 if bidirectional
+            dim_out=out_layer_dim,
+            n_layers=1,
+            bidirectional=True,
+        ) 
+
+        out_layer_width = out_layer_dim
+        self.out_layer =  [
+            nn.Linear(
+                in_features=out_layer_width, out_features=out_layer_width//2
+            ),
+            nn.ReLU(),
+            nn.Linear(
+                in_features=out_layer_width//2, out_features=out_dim
+            ),
+        ]
+        self.out_layer = nn.Sequential(*self.out_layer)
+
+        self.out_layer2 =  [
+            nn.Linear(
+                in_features=out_layer_width, out_features=out_layer_width//2
+            ),
+            nn.ReLU(),
+            nn.Linear(
+                in_features=out_layer_width//2, out_features=CONFIGS[self.params['disease']]["num_patch"]
+            ),
+        ]
+        self.out_layer2 = nn.Sequential(*self.out_layer2)
+
+        self.out_layer3 =  [
+            nn.Linear(
+                in_features=out_layer_width, out_features=out_layer_width//2
+            ),
+            nn.ReLU(),
+            nn.Linear(
+                in_features=out_layer_width//2, out_features=CONFIGS[self.params['disease']]["num_patch"]*CONFIGS[self.params['disease']]["num_patch"]
+            ),
+        ]
+
+        self.out_layer3 = nn.Sequential(*self.out_layer3)
+        def init_weights(m):
+            if isinstance(m, nn.Linear):
+                torch.nn.init.xavier_uniform_(m.weight)
+                m.bias.data.fill_(0.01)
+        self.out_layer.apply(init_weights)
+        self.out_layer2.apply(init_weights)
+        self.out_layer3.apply(init_weights)
+
+        self.min_values = torch.tensor(MIN_VAL_PARAMS[scale_output],device=self.device)
+        self.max_values = torch.tensor(MAX_VAL_PARAMS[scale_output],device=self.device)
+        self.min_values_2 = torch.tensor(MIN_VAL_PARAMS_2[scale_output],device=self.device)
+        self.max_values_2 = torch.tensor(MAX_VAL_PARAMS_2[scale_output],device=self.device)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x, meta, x_2, meta2):
+        # emb_model: handling zipcode-level private transaction dataset
+        x_embeds, encoder_hidden = self.emb_model.forward(x[:, :, :5].transpose(1, 0), meta)
+        # emb_model_2: handling city-level public dataset
+        x_embeds_2, encoder_hidden_2 = self.emb_model_2.forward(x_2.transpose(1, 0), meta2)
+        x_embeds_3, encoder_hidden_3 = self.emb_model_3.forward(x[:, :, 5:].transpose(1, 0), meta)
+        # concatenate embeddings
+        x_embeds = torch.cat([x_embeds, x_embeds_3, x_embeds_2.mean(dim=0).unsqueeze(0)], dim=0)
+        encoder_hidden = torch.cat([encoder_hidden, encoder_hidden_3, encoder_hidden_2.mean(dim=1).unsqueeze(1)], dim=1)
+
+        time_seq = torch.arange(1,self.training_weeks+WEEKS_AHEAD+1).repeat(x_embeds.shape[0],1).unsqueeze(2)
+        Hi_data = ((time_seq - time_seq.min())/(time_seq.max() - time_seq.min())).to(self.device)
+        emb = self.decoder(Hi_data, encoder_hidden, x_embeds) 
+        out = self.out_layer(emb)
+        out = torch.mean(out, dim=0)
+        # `out` contains the predicted epi parameters except for beta
+        out = self.min_values + (self.max_values-self.min_values)*self.sigmoid(out)
+
+        emb_mean = torch.mean(emb, dim=0)
+        emb_mean = emb_mean[-1, :]
+        
+        out2 = self.out_layer2(emb_mean)
+        # `out` contains the predicted `seed_status`
+        out2 = self.min_values_2 + (self.max_values_2-self.min_values_2)*self.sigmoid(out2) # (5)
+
+        # `out3` contains the predicted beta matrix
+        out3 = self.sigmoid(self.out_layer3(emb_mean).reshape((CONFIGS[self.params['disease']]["num_patch"], CONFIGS[self.params['disease']]["num_patch"])))
+        
+        return out, out2, out3
+
 def save_model(model,file_name,disease,region,week, args):
     PATH = os.path.join(SAVE_MODEL_PATH,disease,region, args.date)
     print(PATH)
@@ -410,7 +539,7 @@ def runner(params, devices, verbose, args):
             test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=500, shuffle=False)
 
             metas_train_dim = 1
-            X_train_dim = 5
+            X_train_dim = 11
 
             params['num_steps'] = len(train_dataset)
 
@@ -469,7 +598,6 @@ def runner(params, devices, verbose, args):
                     # forward simulator for several time steps
                     if BENCHMARK_TRAIN:
                         start_bench = time.time()
-                    
                     # get predictions after running meta-population model
                     predictions = forward_simulator(params,param_values,abm,training_num_steps,counties,devices)
                     if BENCHMARK_TRAIN:
@@ -538,7 +666,10 @@ def runner(params, devices, verbose, args):
                     param_values = param_model_forward(param_model,params,x,meta)
                 
                 # forward simulator for several time steps
+                
                 preds = forward_simulator(params,param_values,abm,num_step,counties,devices)
+                # print(preds)
+                # print(preds.shape)
                 batch_predictions.append(preds)
                 counties_predicted.extend(counties)
                 if 'meta' in params["model_name"]:
@@ -583,6 +714,7 @@ def runner(params, devices, verbose, args):
                      predictions_train[:CONFIGS[params["disease"]]["train_days"]])) / target[:CONFIGS[params["disease"]]["train_days"]]) * 100)
             training_mae.append(mae_train)
         print('RMSE: ', sum(all_rmses)/len(all_rmses))
+        print(all_maes)
         print('testing MAE: ', sum(all_maes)/len(all_maes))
         print('training MAE: ', sum(training_mae)/len(training_mae))
         print('training MAPES', sum(all_mapes_train)/len(all_mapes_train))
@@ -621,6 +753,8 @@ def train_predict(args):
     global data, meta2
     # load the pre-processed transaction dataset and normalize the dataset
     data = torch.load("./Data/Processed/online/transaction_private_lap_{}.pt".format(args.date)).to(torch.float32).unsqueeze(2)
+    # data = torch.load("./Data/Processed/online/transaction_public.pt").to(torch.float32).unsqueeze(2)
+    # data = torch.load("./Data/Processed/transaction_legacy/transaction_private_s2_eps1.pt".format(args.date)).to(torch.float32).unsqueeze(2)
     data = torch.nn.functional.normalize(data,dim=0).to("cuda:0")
     meta2 = torch.eye(data.shape[0]).to("cuda:0")
 

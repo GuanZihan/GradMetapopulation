@@ -9,7 +9,7 @@ def plot_predictions(target, predictions, rmse, rmse_test, state_idx, args):
     plt.xlabel("TimeStamp")
     plt.ylabel("Mortality Number")
     plt.legend(["Ground-truth", "Predictions"])
-    fig.savefig(os.path.join("Figure-Prediction", f"State_{state_idx}_{args.date}.png"))
+    fig.savefig(os.path.join("Figure-Prediction", f"State_{state_idx}_{args.date}_{args.note}.png"))
 
 
 def plot_losses(losses, params, args):

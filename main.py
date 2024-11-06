@@ -1,5 +1,7 @@
 from epiweeks import Week
 from train_abm_beta_matrix import train_predict
+# from train import train_predict
+
 from train_abm_privacy import train_predict_privacy
 
 import argparse
@@ -52,7 +54,10 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--results_file_postfix', help='Postfix to be appended to output dir for ease of interpretation', default = '')
     parser.add_argument('-da', '-dataset', default="./Data/Processed/county_data.csv")
     parser.add_argument('-date', default="03-03")
+    parser.add_argument('-note', type=str, default="")
     parser.add_argument('--privacy', action="store_true")
+    parser.add_argument('--Delta', type=int, default=1)
+    parser.add_argument('-x', type=int, default=5)
     # parser.set_defaults(joint=True)  # make true when removing no joint
     parser.set_defaults(inference_only=False)  # make true when removing no joint
     args = parser.parse_args()

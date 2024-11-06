@@ -10,22 +10,23 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--moving_window', type=int, default=0)
 parser.add_argument('--root', type=str, default="./Data/Processed")
 parser.add_argument('--saved_root', type=str, default="./Data/Processed/online")
-
+parser.add_argument('--eps', type=int, default=1)
 
 args = parser.parse_args()
 
 
 start_date = pd.to_datetime("2020-03-03")
-period = pd.to_timedelta(350+args.moving_window*7, unit='D')
+period = pd.to_timedelta(350+args.moving_window*7, unit='D') # 350
 end_date = start_date + period
 
 
-data = pd.read_csv(os.path.join(args.root, "private_agg.csv"))
+data = pd.read_csv(os.path.join(args.root, "private_agg_{}.csv".format(args.eps)))
 
 data["date"] = pd.to_datetime(data["date"], format='%Y-%m-%d')
 data["merch_postal_code"] = data["merch_postal_code"].apply(str)
 
 data = data[data.merch_postal_code.str.startswith("11")]
+
 data_selected = data[(data["date"] <= end_date) & (data["date"] >= start_date)]
 
 all_location_time_series = pd.DataFrame([])

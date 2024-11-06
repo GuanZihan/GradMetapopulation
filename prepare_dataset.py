@@ -4,6 +4,12 @@ import argparse
 import os
 
 
+def region_filter(country_code, region_1, region_2, all=False):
+    mask = ((df["country_region_code"].isin(country_code)) & (df["sub_region_1"].isin(region_1)))
+    if all:
+        mask = (mask & (df["sub_region_2"].isin(region_2)))
+    return df[mask]
+    
 parser = argparse.ArgumentParser()
 parser.add_argument('--moving_window', type=int, default=0)
 parser.add_argument('--test', action='store_true')
@@ -15,7 +21,7 @@ args = parser.parse_args()
 
 start_date = pd.to_datetime("2020-03-03")
 test_period = 28 if args.test else 0
-period = pd.to_timedelta(350+args.moving_window*7 + test_period, unit='D')
+period = pd.to_timedelta(int(args.week+1)+args.moving_window*7 + test_period, unit='D') # 350
 
 end_date = start_date + period
 
@@ -49,8 +55,19 @@ print(data_selected.shape)
 print(GHT.shape)
 print(pcr_data.shape)
 
+df = pd.read_csv("./Data/Processed/Global_Mobility_Report.csv", low_memory=False)
 
-merged_dataset = pd.merge(pd.merge(data_selected,GHT,left_on='date', right_on="Week"),pcr_data, left_on='date', right_on="Fecha")
+df_co_1 = region_filter(["CO"], ["Bogota"], "")
+
+mobility_data = df_co_1[['date', 'retail_and_recreation_percent_change_from_baseline',
+       'grocery_and_pharmacy_percent_change_from_baseline',
+       'parks_percent_change_from_baseline',
+       'transit_stations_percent_change_from_baseline',
+       'workplaces_percent_change_from_baseline',
+       'residential_percent_change_from_baseline']]
+mobility_data["date"] = pd.to_datetime(mobility_data["date"], format='%Y-%m-%d')
+
+merged_dataset = pd.merge(pd.merge(pd.merge(data_selected,GHT,left_on='date', right_on="Week"),pcr_data, left_on='date', right_on="Fecha"), mobility_data, left_on="date", right_on="date")
 merged_dataset.drop(columns=["Week", "date", "year", "Fecha", "epi_week", "region", "incremental", "covid-19 vacuna"], inplace=True)
 
 if not os.path.exists(args.saved_root):
