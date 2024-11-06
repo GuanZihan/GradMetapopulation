@@ -60,6 +60,20 @@ python main.py -st MA -j -d 0 --seed 1234 -m meta -di bogota -date "0_moving"
 
 There will be several visualization results.
 - Fitting plot saved under the `Figure-Prediction` directory
+![Example of Fitting Plot](Figure-Prediction/State_0_0_moving_.png)
 - Training loss curve saved under the `Figures` directory
+![Example of Loss Curve](Figures/bogota/joint/losses_0_moving_False.png)
 - Parameters of the trained model saved under the `Results` directory
 
+
+
+## Counterfactual Analysis
+
+The counterfactual analysis is based on the prepared datasets (including public and private), and the trained model (file ending with .pt). After that, you could run the following command the get the counterfactual analysis results.
+
+```bash
+bash dung_run.sh
+```
+
+Then the counterfactual analysis will be saved at an image named 'counter_factual.png', e.g.,
+![Example of Counter Factual Analysis](./counter_factual.png)
