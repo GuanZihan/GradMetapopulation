@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 start_date = pd.to_datetime("2020-03-03")
 test_period = 28 if args.test else 0
-period = pd.to_timedelta(int(args.week+1)+args.moving_window*7 + test_period, unit='D') # 350
+period = pd.to_timedelta((int(args.week+1)+args.moving_window)*7 + test_period, unit='D') # 350
 
 end_date = start_date + period
 
