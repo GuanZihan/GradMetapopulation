@@ -5,7 +5,7 @@
 Use the package manager [conda](https://docs.conda.io/en/latest/) to install required Python dependencies. Note: We used Python 3.7.
 
 ```bash
-conda env create -f enviroment.yml
+conda env create -f environment.yml
 ```
 
 ## Training
