@@ -75,5 +75,5 @@ if not os.path.exists(args.saved_root):
 merged_dataset.to_csv(os.path.join(args.saved_root, "{}_{}_moving.csv".format("test" if args.test else "train", args.moving_window)), index=None)
 
 print(merged_dataset.shape[0] / 7)
-assert args.week == merged_dataset.shape[0] / 7
+assert (args.week + test_period//7) == merged_dataset.shape[0] / 7
 print(merged_dataset.shape)

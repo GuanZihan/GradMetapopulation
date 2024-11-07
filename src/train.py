@@ -8,7 +8,6 @@ import time
 from torch.autograd import Variable
 from data_utils import WEEKS_AHEAD, states, counties
 from copy import copy
-from abm_model import GradABM
 from model_utils import EmbedAttenSeq, fetch_county_data_covid, fetch_county_data_flu, DecodeSeq, SEIRM, SIRS, MetapopulationSEIRM, fetch_age_group_data_covid, moving_average, MetapopulationSEIRMBeta
 import pdb
 import opendp

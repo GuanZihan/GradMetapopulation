@@ -14,13 +14,13 @@ conda env create -f enviroment.yml
 To quickly evaluate our method on the Bogota dataset, run the following command:
 
 ```bash
-bash run.sh 
+bash scripts/run.sh 
 ```
 
 If you want to acess our system with a user-friendly GUI, simply run the code (**currently still in progress, coming soon**):
 
 ```python
-python index.py
+python src/index.py
 ```
 
 ### Detailed Steps
@@ -34,8 +34,8 @@ We use two types of data sources:
 To prepare the public dataset, use the following commands:
 
 ```python
-python prepare_dataset.py --moving_window 0 --week 49
-python prepare_dataset.py --moving_window 0 --week 49 --test
+python src/prepare_dataset.py --moving_window 0 --week 49
+python src/prepare_dataset.py --moving_window 0 --week 49 --test
 ```
 - The week parameter controls the length of the training period (default: 49 weeks starting from 2020-03-01).
 - The moving_window parameter specifies how many windows to expand from the given training period. It is used in the on-line setting experiments. **If you do not want to evaluate the on-line setting, simply set it as 0.**
@@ -53,8 +53,9 @@ python prcess_data_dung.py --moving_window 0 --eps 1
 After preparing the datasets, run the following command to perform epidemic simulation and prediction:
 
 ```python
-python main.py -st MA -j -d 0 --seed 1234 -m meta -di bogota -date "0_moving"
+python src/main.py -st MA -j -d 0 --seed 1234 -m meta -di bogota -date "0_moving"
 ```
+- Here the device parameter `-d` is set as "cuda:0". If you do not have GPU, simply set it as "cpu".
 
 **Step 3: Check Experimental Results**
 

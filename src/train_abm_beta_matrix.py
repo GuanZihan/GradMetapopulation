@@ -8,9 +8,9 @@ from copy import copy
 import pandas as pd
 from torch.autograd import Variable
 
-from src.data_utils import WEEKS_AHEAD, states, counties
-from src.model_utils import EmbedAttenSeq, fetch_county_data_covid, fetch_county_data_flu, DecodeSeq, SEIRM, SIRS, MetapopulationSEIRM, fetch_age_group_data_covid, moving_average, MetapopulationSEIRMBeta
-from src.visualize_results import *
+from data_utils import WEEKS_AHEAD, states, counties
+from model_utils import EmbedAttenSeq, fetch_county_data_covid, fetch_county_data_flu, DecodeSeq, SEIRM, SIRS, MetapopulationSEIRM, fetch_age_group_data_covid, moving_average, MetapopulationSEIRMBeta
+from visualize_results import *
 
 
 
@@ -733,11 +733,20 @@ def train_predict(args):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
+    global devices
+    if args.dev == ['cpu']:
+        devices = [torch.device("cpu")]
+    else:
+        devices = [torch.device(f'cuda:{i}') for i in args.dev]
+    
+    print('devices used:',devices)
+    
+
     global data, meta2
     # load the pre-processed transaction dataset and normalize the dataset
     data = torch.load("./Data/Processed/online/transaction_private_lap_{}.pt".format(args.date)).to(torch.float32).unsqueeze(2)
-    data = torch.nn.functional.normalize(data,dim=0).to("cuda:0")
-    meta2 = torch.eye(data.shape[0]).to("cuda:0")
+    data = torch.nn.functional.normalize(data,dim=0).to(devices[0])
+    meta2 = torch.eye(data.shape[0]).to(devices[0])
 
     global CONFIGS
     # configs for different datasets
@@ -796,12 +805,7 @@ def train_predict(args):
     params['model_name'] = args.model_name
     params['date'] = args.date
 
-    if args.dev == ['cpu']:
-        devices = [torch.device("cpu")]
-    else:
-        devices = [torch.device(f'cuda:{i}') for i in args.dev]
     
-    print('devices used:',devices)
     verbose = False
     
     # upper and lower bounds of the neural network prediction

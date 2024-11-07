@@ -1,8 +1,5 @@
 from epiweeks import Week
 
-
-from train_abm_privacy import train_predict_privacy
-
 import argparse
 import os
 import numpy as np
@@ -75,10 +72,8 @@ if __name__ == "__main__":
     def run_all_weeks(args):
         args.pred_week = pred_ew.cdcformat()
         try:
-            if args.privacy:
-                counties_predicted, predictions, learned_params = train_predict_privacy(args)
-            else:
-                counties_predicted, predictions, learned_params = train_predict(args) 
+            
+            counties_predicted, predictions, learned_params = train_predict(args) 
             num_counties = len(counties_predicted)
             save_params(disease,model_name,pred_ew,learned_params, args)
         except Exception as e:
