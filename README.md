@@ -43,7 +43,7 @@ python src/prepare_dataset.py --moving_window 0 --week 49 --test
 
 To prepare the private dataset, use the following command:
 ```python
-python prcess_data_dung.py --moving_window 0 --eps 1
+python src/prcess_data_dung.py --moving_window 0 --eps 1
 ```
 - The moving_window parameter is used similarly here to control the expansion of windows.
 - Note that this script will aggregate the privatized transaction dataset saved at `Data/Processed/private_agg_1.csv`. You can choose other $\epsilon \in \{1, 5, 10 \}$.
