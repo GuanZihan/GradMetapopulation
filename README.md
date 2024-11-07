@@ -73,7 +73,7 @@ There will be several visualization results.
 The counterfactual analysis is based on the prepared datasets (including public and private), and the trained model (file ending with .pt). After that, you could run the following command the get the counterfactual analysis results.
 
 ```bash
-bash dung_run.sh
+bash src/dung_run.sh
 ```
 
 Then the counterfactual analysis will be saved at an image named 'counter_factual.png', e.g.,
