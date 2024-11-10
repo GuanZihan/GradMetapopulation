@@ -22,16 +22,39 @@ If you want to acess our system with a user-friendly GUI, simply run the code (*
 ```python
 python src/index.py
 ```
+### Data Collection
+Our method accepts a combination of public datasets (collected from online sources) and private datasets (i.e., financial transaction datasets). We here give a detailed decription of how to **collect** and **pre-process** the datasets.
+
+The public datasets are collected from the following three sources. We will describe the included features and how to prepare them for your target city.
+
+- **Infections Datasets**:
+[Infections Datasets](Data/Processed/minimal_dataset.csv) is of the shape (#TimeStamps, #Features_inf), recording the `cases` and `deaths` for the Bogota city. Tu run the method on your target city, please prepare infections dataset with the similar format and at least contains features `year`, `cases`, and `deaths`. Save the infections datasets under the `Data/Processed/` directory with the same name `minimal_dataset.csv`.
+
+- **Google Health Trends**: 
+Search Google Health Trends is of the shape (#TimeStamps, #Features_ght), with the relevant terms such as `covid-19 en colombia`, `covid-19 hoy`, `covid-19 bogota`.
+For example This [link]((https://trends.google.com/trends/explore?date=today%205-y&geo=CO-DC&q=covid-19%20en%20colombia)) provides an example of the time series of the term `covid-19 en colombia`. We provide a prepared datasets [here](Data/Processed/multiTimeline.csv) for your convience. To run the method on your target city, please prepare the GHT dataset with similar methods and save them under `Data/Processed/` directory with the same name `multiTimeline.csv`.
+
+- **Mobility Dataset**:
+The [Google Mobility Dataset](https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv) covers from February 2020 up to October 2022, containing six features including `retail_and_recreation_percent_change_from_baseline`, `grocery_and_pharmacy_percent_change_from_baseline`, `parks_percent_change_from_baseline`, `transit_stations_percent_change_from_baseline`, `workplaces_percent_change_from_baseline`, `residential_percent_change_from_baseline`. This dataset can be directly downloaded without any changes unless your target city is not in the mobility dataset. Save them under `Data/Processed/` directory with the same name `Global_Mobility_Report.csv`.
+
+For the private financial transaction dataset, we use [the one](Data/Processed/technical_phase_data.csv) provided by the PETs committee.
+
+**IMPORTANT: Please make sure all the time series are in the same period.**
+
+**IMPORTANT: If you incur any troubles or have any questions about the data preparation, please contact [Zihan](mailto:bxv6gs@virginia.edu).**
+
+
+
 
 ### Detailed Steps
 Our pipeline consists of two steps:
 
 **Step 1: Data Preparation**
-We use two types of data sources:
-- **public dataset** such as Google Heath Trends, PCR, Mobility Dataset, and so on
+Now we have the following two sources of datasets:
+- **public dataset** i.e., Infections Datasets, Google Heath Trends, and Mobility Dataset. The total number of features that will be used for epidemics model learning will then be `#Features_inf + #Features_ght + 6`.
 - **private dataset**, i.e., financial transacation dataset
 
-To prepare the public dataset, use the following commands:
+To pre-process the public dataset, use the following commands:
 
 ```python
 python src/prepare_dataset.py --moving_window 0 --week 49
