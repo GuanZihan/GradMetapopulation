@@ -17,12 +17,16 @@ To quickly evaluate our method on the Bogota dataset, run the following command:
 bash scripts/run.sh 
 ```
 
-If you want to acess our system with a user-friendly GUI, simply run the code (**currently still in progress, coming soon**):
+If you want to acess our system with a user-friendly GUI, simply run the code:
 
 ```python
 python src/index.py
 ```
-### Data Collection
+
+### Data Preparation
+<details>
+  <summary>Step 1: Data Collection</summary>
+  
 Our method accepts a combination of public datasets (collected from online sources) and private datasets (i.e., financial transaction datasets). We here give a detailed decription of how to **collect** and **pre-process** the datasets.
 
 The public datasets are collected from the following three sources. We will describe the included features and how to prepare them for your target city.
@@ -43,13 +47,12 @@ For the private financial transaction dataset, we use [the one](Data/Processed/t
 
 **IMPORTANT: If you incur any troubles or have any questions about the data preparation, please contact [Zihan](mailto:bxv6gs@virginia.edu).**
 
+</details>
 
 
+<details>
+  <summary>Step 2: Data Pre-processing</summary>
 
-### Detailed Steps
-Our pipeline consists of two steps:
-
-**Step 1: Data Preparation**
 Now we have the following two sources of datasets:
 - **public dataset** i.e., Infections Datasets, Google Heath Trends, and Mobility Dataset. The total number of features that will be used for epidemics model learning will then be `#Features_inf + #Features_ght + 6`.
 - **private dataset**, i.e., financial transacation dataset
@@ -71,7 +74,13 @@ python src/prcess_data_dung.py --moving_window 0 --eps 1
 - The moving_window parameter is used similarly here to control the expansion of windows.
 - Note that this script will aggregate the privatized transaction dataset saved at `Data/Processed/private_agg_1.csv`. You can choose other $\epsilon \in \{1, 5, 10 \}$.
 
-**Step 2: Model Training**
+</details>
+
+
+### Training and Evaluation
+Our pipeline consists of two steps:
+
+**Step 1: Model Training**
 
 After preparing the datasets, run the following command to perform epidemic simulation and prediction:
 
@@ -80,14 +89,30 @@ python src/main.py -st MA -j -d 0 --seed 1234 -m meta -di bogota -date "0_moving
 ```
 - Here the device parameter `-d` is set as "cuda:0". If you do not have GPU, simply set it as "cpu".
 
-**Step 3: Check Experimental Results**
+**Step 2: Visualize Experimental Results**
 
 There will be several visualization results.
-- Fitting plot saved under the `Figure-Prediction` directory
+<details>
+  <summary> Fitting plot saved under the `Figure-Prediction` directory </summary>
+
 ![Example of Fitting Plot](Figure-Prediction/State_0_0_moving_.png)
-- Training loss curve saved under the `Figures` directory
-![Example of Loss Curve](Figures/bogota/joint/losses_0_moving_False.png)
-- Parameters of the trained model saved under the `Results` directory
+
+</details>
+
+<details>
+  <summary> Training loss curve saved under the `Figures` directory </summary>
+
+  ![Example of Loss Curve](Figures/bogota/joint/losses_0_moving_False.png)
+
+</details>
+
+<details>
+  <summary> Parameters of the trained model saved under the `Results` directory
+ </summary>
+
+
+</details>
+
 
 
 
@@ -100,4 +125,5 @@ bash src/dung_run.sh
 ```
 
 Then the counterfactual analysis will be saved at an image named 'counter_factual.png', e.g.,
+
 ![Example of Counter Factual Analysis](./counter_factual.png)
