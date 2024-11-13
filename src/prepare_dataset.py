@@ -16,6 +16,7 @@ parser.add_argument('--test', action='store_true')
 parser.add_argument('--root', type=str, default="./Data/Processed")
 parser.add_argument('--saved_root', type=str, default="./Data/Processed/online")
 parser.add_argument('--week', type=int, default=49)
+parser.add_argument('--case_only', action="store_true")
 
 args = parser.parse_args()
 
@@ -68,12 +69,26 @@ mobility_data = df_co_1[['date', 'retail_and_recreation_percent_change_from_base
 mobility_data["date"] = pd.to_datetime(mobility_data["date"], format='%Y-%m-%d')
 
 merged_dataset = pd.merge(pd.merge(pd.merge(data_selected,GHT,left_on='date', right_on="Week"),pcr_data, left_on='date', right_on="Fecha"), mobility_data, left_on="date", right_on="date")
-merged_dataset.drop(columns=["Week", "date", "year", "Fecha", "epi_week", "region", "incremental", "covid-19 vacuna"], inplace=True)
+if not args.case_only:
+    merged_dataset.drop(columns=["Week", "date", "year", "Fecha", "epi_week", "region", "incremental", "covid-19 vacuna"], inplace=True)
+else:
+    merged_dataset.drop(columns=["date", "year", "Fecha", "epi_week", "region", "incremental", "covid-19 vacuna"], inplace=True)
+    merged_dataset = merged_dataset[["Week", "cases"]]
+    # merged_dataset.loc["index"] = 0
+    merged_dataset.set_index('Week', inplace=True)
+    merged_dataset = merged_dataset.T
+    # merged_dataset = merged_dataset.reset_index()
+    
+
+
 
 if not os.path.exists(args.saved_root):
     os.mkdir(args.saved_root)
-merged_dataset.to_csv(os.path.join(args.saved_root, "{}_{}_moving.csv".format("test" if args.test else "train", args.moving_window)), index=None)
+
+merged_dataset = merged_dataset.iloc[:(args.week*7+test_period), :]
+merged_dataset.to_csv(os.path.join(args.saved_root, "{}_{}_moving{}.csv".format("test" if args.test else "train", args.moving_window, "_lstm" if args.case_only else "")), index=None)
 
 print(merged_dataset.shape[0] / 7)
-assert (args.week + test_period//7) == merged_dataset.shape[0] / 7
-print(merged_dataset.shape)
+
+if not args.case_only:
+    assert (args.week + test_period//7) == merged_dataset.shape[0] / 7

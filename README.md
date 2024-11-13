@@ -11,10 +11,16 @@ conda env create -f environment.yml
 ## Training
 
 ### Quick Demo
-To quickly evaluate our method on the Bogota dataset, run the following command:
+To quickly evaluate our method on the Bogota dataset, run the following command for the GradMetapopulation Method:
 
 ```bash
 bash scripts/run.sh 
+```
+
+For the LSTM Method, run the following code:
+
+```bash
+bash scripts/run_lstm.sh
 ```
 
 If you want to acess our system with a user-friendly GUI, simply run the code:

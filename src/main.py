@@ -55,12 +55,13 @@ if __name__ == "__main__":
     parser.add_argument('--Delta', type=int, default=1)
     parser.add_argument('-x', type=int, default=5)
     parser.add_argument('-counterfactual', action='store_true')
+    parser.add_argument('-week', default=0, type=int)
     # parser.set_defaults(joint=True)  # make true when removing no joint
     parser.set_defaults(inference_only=False)  # make true when removing no joint
     args = parser.parse_args()
 
     if args.counterfactual is False:
-        from train_abm_beta_matrix import train_predict
+        from train_quantile_loss import train_predict
     else:
         from train import train_predict
 
@@ -75,7 +76,7 @@ if __name__ == "__main__":
             
             counties_predicted, predictions, learned_params = train_predict(args) 
             num_counties = len(counties_predicted)
-            save_params(disease,model_name,pred_ew,learned_params, args)
+            # save_params(disease,model_name,pred_ew,learned_params, args)
         except Exception as e:
             print(f'exception: did not work for {args.state} week {pred_ew}: '+ str(e) + '\n')
             traceback.print_exc()

@@ -518,8 +518,8 @@ def runner(params, devices, verbose, args):
             train_dataset = SeqDataset("./Data/Processed/online/train_{}.csv".format(args.date), "cases")
             test_dataset = SeqDataset("./Data/Processed/online/test_{}.csv".format(args.date), "cases")
 
-            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=500, shuffle=False)
-            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=500, shuffle=False)
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=800, shuffle=False)
+            test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=800, shuffle=False)
 
             metas_train_dim = 1
             X_train_dim = 11
@@ -673,7 +673,7 @@ def runner(params, devices, verbose, args):
         for state_idx, target_values in enumerate(y.unsqueeze(0)):
             target = torch.squeeze(target_values.detach()).numpy()
             predictions_train = torch.squeeze(predictions.detach()[state_idx]).cpu().numpy()
-            
+            print(target.shape, predictions_train.shape)
             # print(target[(CONFIGS[params["disease"]]["train_days"]-10):CONFIGS[params["disease"]]["train_days"]], predictions_train[(CONFIGS[params["disease"]]["train_days"]-10):CONFIGS[params["disease"]]["train_days"]])
             rmse = np.sqrt(
             np.mean((target[:CONFIGS[params["disease"]]["train_days"]] -
@@ -754,7 +754,7 @@ def train_predict(args):
         "bogota": {
             "num_patch": 16,
             "learning_rate": 5e-5,
-            "train_days": 343 + eval(args.date.split("_")[0]) * 7,
+            "train_days": args.week*7,
             "test_days": 28,
             "num_pub_features": 1
         },
@@ -770,7 +770,7 @@ def train_predict(args):
     # if calculating training time
     BENCHMARK_TRAIN = False
     # number of epochs
-    NUM_EPOCHS_DIFF = 2000
+    NUM_EPOCHS_DIFF = 20
     print("---- MAIN IMPORTS SUCCESSFUL -----")
 
 

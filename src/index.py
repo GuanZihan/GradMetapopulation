@@ -43,7 +43,7 @@ if status:
         st.warning("Please upload all three files before saving.")
 
     process = subprocess.Popen(
-        ["python", '-u', "src/main.py", "--state", "MA", "--disease", city, "--joint", "--dev", "0" if device == "gpu" else device, "--model_name", "meta", "--disease", "bogota", "-date", "0_moving"],
+        ["python", '-u', "src/main.py", "--state", "MA", "--disease", city, "--joint", "--dev", "0" if device == "gpu" else device, "--model_name", "meta", "--disease", "bogota", "-date", "0_moving", "-week", 49],
         stdout=subprocess.PIPE,
         universal_newlines=True
     )
