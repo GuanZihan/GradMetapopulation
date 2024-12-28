@@ -1,0 +1,42 @@
+{
+    "data_path": "/scratch/bxv6gs/GradABM/Data/Processed/online/transaction_private_lap_{}.pt",
+    "configurations": {
+        "bogota": {
+            "num_patch": 16,
+            "learning_rate": 5e-5,
+            "train_days_base": 7,
+            "test_days": 28,
+            "num_pub_features": 1
+        },
+        "COVID": {
+            "num_patch": 10,
+            "learning_rate": 1e-4,
+            "train_days_base": 175,
+            "test_days": 28
+        }
+    },
+    "num_epochs_diff": 2000,
+    "days_head": 28,
+    "save_model_path": "/scratch/bxv6gs/GradABM/Models/",
+    "smooth_window": 7,
+    "min_val_params": {
+        "abm-covid": [1.0, 0.001, 0.01],
+        "abm-flu": [1.05, 0.1],
+        "seirm": [0.0, 0.0, 0.0, 0.0, 0.01],
+        "sirs": [0.0, 0.1],
+        "meta": [0, 0, 0, 0, 0, 0, 0]
+    },
+    "max_val_params": {
+        "abm-covid": [8.0, 0.02, 1.0],
+        "abm-flu": [2.6, 5.0],
+        "seirm": [1.0, 1.0, 1.0, 1.0, 1.0],
+        "sirs": [1.0, 5.0],
+        "meta": [1, 1, 1, 1, 1, 1, 1]
+    },
+    "min_val_params_2": {
+        "meta": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    },
+    "max_val_params_2": {
+        "meta": [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]
+    }
+}
