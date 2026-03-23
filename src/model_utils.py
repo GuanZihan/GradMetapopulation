@@ -1,18 +1,23 @@
 ''' County and State Data Processing network'''
 
-import numpy as np
-import torch
-import torch.nn as nn
-from data_utils import get_state_train_data_flu, create_window_seqs, get_county_train_data, counties, get_age_group_train_data, get_time_series_train_data
-from sklearn.preprocessing import StandardScaler
-import torch.nn as nn
-import numpy as np
-import torch
-import pdb 
 import math
-import pandas as pd
 import os
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
 import yaml
+from sklearn.preprocessing import StandardScaler
+
+from data_utils import (
+    counties,
+    create_window_seqs,
+    get_age_group_train_data,
+    get_county_train_data,
+    get_state_train_data_flu,
+    get_time_series_train_data,
+)
 cuda = torch.device('cuda')
 dtype = torch.float
 SMOOTH_WINDOW = 7

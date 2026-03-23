@@ -10,7 +10,7 @@
     },
     "num_epochs_diff": 500,
     "days_head": 7,
-    "save_model_path": "/project/biocomplexity/bxv6gs/GradMetapopulation/Models/",
+    "save_model_path": "Models/",
     "smooth_window": 7,
     "min_val_params": {
         "abm-covid": [1.0, 0.001, 0.01],

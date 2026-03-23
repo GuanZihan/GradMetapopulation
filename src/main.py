@@ -2,8 +2,6 @@ from epiweeks import Week
 
 import argparse
 import json
-from utils import save_params
-        
 
 
 if __name__ == "__main__":

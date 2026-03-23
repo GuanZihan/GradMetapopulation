@@ -343,7 +343,6 @@ class CalibNNOneEncoderThreeOutputs(nn.Module):
     
     def forward_lstm(self, x, x_exo):
         x_ = x * scaler.scale_[0] + scaler.min_[0]
-        # pdb.set_trace()
         train_X = x_.squeeze().unfold(0,5,1).unsqueeze(-1)[:,-5:,-1]
         outputs = self.lstm_model(train_X)
         return outputs

@@ -1,13 +1,11 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import argparse
 import os
-from epiweeks import Week
-import numpy as np
+
+import pandas as pd
 
 
-def region_filter(country_code):
-    mask = ((df["country_region_code"].isin(country_code)) & (df["sub_region_1"].isna()))
+def region_filter(df, country_code):
+    mask = df["country_region_code"].isin(country_code) & df["sub_region_1"].isna()
     return df[mask]
     
 parser = argparse.ArgumentParser()
@@ -58,7 +56,7 @@ print(GHT.shape)
 
 df = pd.read_csv("./Data/Processed/Global_Mobility_Report.csv", low_memory=False)
 
-df_co_1 = region_filter(["US"])
+df_co_1 = region_filter(df, ["US"])
 
 mobility_data = df_co_1[['date', 'retail_and_recreation_percent_change_from_baseline',
        'grocery_and_pharmacy_percent_change_from_baseline',

@@ -6,18 +6,13 @@ import torch.nn as nn
 import time
 from copy import copy, deepcopy
 import pandas as pd
-from torch.autograd import Variable
 
 from data_utils import WEEKS_AHEAD, states, counties
 from model_utils import EmbedAttenSeq, fetch_county_data_covid, DecodeSeq, MetapopulationSEIRMBeta
-from visualize_results import *
+from visualize_results import plot_losses, plot_predictions, plot_predictions_nowcasting
+from utils import series_to_supervised
 
-from utils import *
-import yaml
 import logging
-
-
-import pdb
 
 from tqdm import tqdm
 
@@ -190,7 +185,6 @@ class CalibNNOneEncoderThreeOutputs(nn.Module):
     
     def forward_lstm(self, x, x_exo):
         x_ = x * scaler.scale_[0] + scaler.min_[0]
-        # pdb.set_trace()
         train_X = x_.squeeze().unfold(0,5,1).unsqueeze(-1)[:,-5:,-1]
         outputs = self.lstm_model(train_X)
         return outputs
@@ -209,7 +203,6 @@ def param_model_forward(param_model,params,x,meta):
     else:
         raise ValueError('model name not valid')
     
-    # pdb.set_trace()
     
     # return action_value, prediction, targets
     return action_value, targets
@@ -389,7 +382,6 @@ def runner(params, devices, verbose, args):
                         predictions = forward_simulator(params,param_values,abm,training_num_steps,counties,devices)
                         predictions_2_in_1 = param_model.forward_lstm(predictions, x)
 
-                        # pdb.set_trace()
 
                         # loss weight is set as all-one values
 

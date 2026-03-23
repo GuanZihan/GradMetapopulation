@@ -1,13 +1,13 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import argparse
 import os
 
+import pandas as pd
 
-def region_filter(country_code, region_1, region_2, all=False):
-    mask = ((df["country_region_code"].isin(country_code)) & (df["sub_region_1"].isin(region_1)))
+
+def region_filter(df, country_code, region_1, region_2, all=False):
+    mask = (df["country_region_code"].isin(country_code)) & (df["sub_region_1"].isin(region_1))
     if all:
-        mask = (mask & (df["sub_region_2"].isin(region_2)))
+        mask = mask & (df["sub_region_2"].isin(region_2))
     return df[mask]
     
 parser = argparse.ArgumentParser()
@@ -41,7 +41,7 @@ GHT = GHT.set_index('Week').resample('D').ffill().reset_index()
 
 df = pd.read_csv("./Data/Processed/Global_Mobility_Report.csv", low_memory=False)
 
-df_co_1 = region_filter(["CO"], ["Bogota"], "")
+df_co_1 = region_filter(df, ["CO"], ["Bogota"], "")
 
 mobility_data = df_co_1[['date', 'retail_and_recreation_percent_change_from_baseline',
        'grocery_and_pharmacy_percent_change_from_baseline',

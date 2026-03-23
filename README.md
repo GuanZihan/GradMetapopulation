@@ -1,6 +1,6 @@
 # Grad-Metapopulation
 
-Everything needed to run the demos is already included under `Data/`. Clone the repo, install dependencies, then run one of the shell scripts below from the **repository root**.
+Everything needed to run the demos is already included under `Data/`. Clone the repo, install dependencies, then run the shell scripts from the **repository root** (paths in `Configs/` are relative to that directory).
 
 ## Setup
 
@@ -11,6 +11,8 @@ python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+`requirements.txt` lists only libraries imported by this codebase. For a specific CUDA build of PyTorch, follow [pytorch.org](https://pytorch.org/get-started/locally/) and install `torch` before or after the other packages.
 
 The training scripts call PyTorch on **GPU device index `0`** (`-d 0`). If you have no GPU, edit the `python src/main.py ...` line in the script you run and replace `-d 0` with `-d cpu`.
 
