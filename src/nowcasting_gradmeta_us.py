@@ -12,7 +12,6 @@ from data_utils import WEEKS_AHEAD, states, counties
 from model_utils import EmbedAttenSeq, fetch_county_data_covid, DecodeSeq, MetapopulationSEIRMBeta
 from visualize_results import *
 
-from models_pets import LSTM_MCDO, LSTM_Two_Encoder
 from utils import *
 import yaml
 import logging
@@ -301,7 +300,7 @@ def runner(params, devices, verbose, args):
         elif 'meta' in params["model_name"]:
             lr = 1e-4  # obtained after tuning
         else:
-            lr = 1e-4 if params['model_name'].startswith('GradABM') else 1e-4
+            lr = 1e-4 if params['model_name'].startswith('GradMetapopulation') else 1e-4
 
         for (x, y) in train_loaders[0]:
             scaler.fit(x.numpy()[:, 0:1])

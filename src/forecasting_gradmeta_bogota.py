@@ -21,7 +21,6 @@ from utils import series_to_supervised
 from tqdm import tqdm
 
 
-r_t = []
 # Configure module logger. If the root logger has no handlers, configure a sensible default.
 logger = logging.getLogger(__name__)
 if not logging.getLogger().hasHandlers():
@@ -394,8 +393,6 @@ def forward_simulator(params: Dict[str, object], param_values: List[torch.Tensor
             param_t = params_epi[time_step//7,:]
             # go simulation step
             _, pred_t = abm.step(time_step, param_t, seed_status, adjustment_matrix)
-            Rt_t, K_t, eigvals_t = abm.compute_Rt(param_t, adjustment_matrix)
-            r_t.append(Rt_t.cpu().item())
             # save the prediction
             predictions[:, time_step] = pred_t
     
@@ -410,6 +407,9 @@ def runner(params: Dict[str, object], devices: Sequence[torch.device], verbose: 
         batch_size = CONFIGS[params['disease']]["num_patch"]
         train_dataset = SeqDataset("./Data/Processed/online/train_{}.csv".format(args.date), "cases")
         test_dataset = SeqDataset("./Data/Processed/online/test_{}.csv".format(args.date), "cases")
+
+        print("Train dataset length: ", len(train_dataset))
+        print("Test dataset length: ", len(test_dataset))
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=800, shuffle=False)
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=800, shuffle=False)
@@ -429,6 +429,7 @@ def runner(params: Dict[str, object], devices: Sequence[torch.device], verbose: 
         train_flag = False if params['inference_only'] else True
 
         num_epochs = NUM_EPOCHS_DIFF
+        print("Num epochs: ", num_epochs)
         # gradient clipping norm
         CLIP = 10
 
@@ -461,9 +462,6 @@ def runner(params: Dict[str, object], devices: Sequence[torch.device], verbose: 
                     # forward simulator for several time steps
                     # get predictions after running meta-population model
                     predictions = forward_simulator(params,param_values,abm,training_num_steps,counties,devices)
-                    # print(predictions.shape, y.shape)
-                    # input()
-                    # predictions_2_in_1 = param_model.forward_lstm(predictions, x)
                     
                     # loss weight is set as all-one values; remove explicit weight variable
                     loss = loss_fcn(y, predictions).mean().sqrt()
@@ -480,6 +478,7 @@ def runner(params: Dict[str, object], devices: Sequence[torch.device], verbose: 
                     tqdm.write("\033[92m" + f"[Epoch {epi + 1}] Loss: {epoch_loss:.4f}" + "\033[0m")
 
                 if torch.isnan(loss):
+                    print("Loss is nan")
                     break
 
                 ''' save best model '''
@@ -532,6 +531,7 @@ def runner(params: Dict[str, object], devices: Sequence[torch.device], verbose: 
                     tqdm.write("\033[92m" + f"[Epoch {epi + 1}] Loss: {epoch_loss:.4f}" + "\033[0m")
 
                 if torch.isnan(loss):
+                    print("Loss is nan")
                     break
                 ''' save best model '''
                 if epoch_loss < best_loss:
@@ -829,10 +829,5 @@ def train_predict(args, configs) -> Tuple[List[torch.Tensor], np.ndarray, List[t
 
     # start training!
     counties_predicted, predictions, learned_params = runner(params, devices, verbose, args)
-
-    global r_t
-    import matplotlib.pyplot as plt
-    plt.plot(r_t)
-    plt.savefig("1.png")
 
     return counties_predicted, predictions, learned_params

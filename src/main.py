@@ -9,7 +9,7 @@ from utils import save_params
 if __name__ == "__main__":
     # Parsing command line arguments
     parser = argparse.ArgumentParser(description='GradMeta for COVID-19.')
-    parser.add_argument('-m','--model_name', help='Model name.', default = 'GradABM')
+    parser.add_argument('-m','--model_name', help='Model name.', default = 'GradMetapopulation')
     parser.add_argument('-di','--disease', help='Disease: COVID or Flu.', default = 'COVID')
     parser.add_argument('-s', '--seed', type=int, help='Seed for python random, numpy and torch', default = 6666)
     parser.add_argument('-n', '--num_runs', type=int, help='Number of runs', default = 1)
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.disease == 'bogota' and args.task == 'forecasting':
-        from forecasting_gradmeta_bogota_single import train_predict
+        from forecasting_gradmeta_bogota import train_predict
     elif args.disease == 'COVID' and args.task == 'forecasting':
         from forecasting_gradmeta_usa import train_predict
     elif args.disease == 'bogota' and args.task == 'nowcasting':
